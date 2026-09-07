@@ -1,0 +1,27 @@
+# Dependencias y build (por si se agregan más adelante)
+node_modules/
+dist/
+target/
+
+# Entorno y secretos (nunca subir)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.pub
+credentials.json
+secrets.json
+
+# Temporales de Office
+~$*
+*.tmp
+
+# IDE y SO
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

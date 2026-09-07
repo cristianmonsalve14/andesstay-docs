@@ -1,11 +1,17 @@
-# andesstay-docs
+# AndesStay — Docs
 
-Documentación del proyecto semestral **AndesStay**.
+## Nombre
+
+`andesstay-docs`
 
 ## Componente
 
-Arquitectura, diagramas, capturas de evidencia (EP1/EP2) y guion de presentación.  
-Un solo GitHub Project (Kanban) cubre este repo y los demás.
+Documentación del proyecto semestral AndesStay.
+
+## Descripción
+
+Repositorio de arquitectura, diagramas, capturas de evidencia (EP1/EP2) y guion de presentación.  
+Un solo GitHub Project (Kanban) cubre este repo y los demás componentes del sistema.
 
 ## Integrantes
 
@@ -13,12 +19,16 @@ Un solo GitHub Project (Kanban) cubre este repo y los demás.
 - Héctor Olivares
 - Rolando Lillo
 
-## Contenido previsto
+**Dueño del repositorio:** Cristian Monsalve
 
-- Diagrama JWT → API Gateway → BFF → microservicios
-- Evidencias 200 / 401 / 403
-- Guion de presentación (5–10 min)
+## Tecnologías
 
-## Dueño del repositorio
+- Markdown
+- Diagramas de arquitectura
+- GitHub Projects (Kanban)
 
-Cristian Monsalve. Todo cambio entra por Pull Request sobre `main`.
+## Convención de ramas
+
+- La rama `main` está protegida: **prohibido push directo**.
+- Todo cambio entra por **Pull Request**.
+- Se exige **al menos 1 reviewer** distinto al autor antes del merge.
