@@ -21,10 +21,15 @@ Un solo GitHub Project (Kanban) cubre este repo y los demás componentes del sis
 
 **Dueño del repositorio:** Cristian Monsalve
 
+## Documentos
+
+- [Identidad Azure AD](IDENTIDAD.md) — tenant, App Registration, audience, scope, roles (sin secretos)
+- [Arquitectura v1](ARQUITECTURA.md) — diagrama JWT → Gateway → BFF → catálogo / reservas
+
 ## Tecnologías
 
 - Markdown
-- Diagramas de arquitectura
+- Diagramas de arquitectura (Mermaid)
 - GitHub Projects (Kanban)
 
 ## Convención de ramas
