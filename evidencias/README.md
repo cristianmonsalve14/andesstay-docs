@@ -8,12 +8,12 @@ Capturas y pruebas verificables para [docs#3](https://github.com/cristianmonsalv
 
 | Archivo sugerido | Qué debe verse | Estado |
 | --- | --- | --- |
-| `01-login.png` | Pantalla login / redirect Microsoft | pendiente subir |
-| `02-token-claims.png` | Access token o `/api/me` con `roles` | pendiente subir |
-| `03-api-me-200.png` | `GET /api/me` → 200 (Admin u otro rol) | pendiente subir |
-| `04-sin-token-401.png` | Sin Bearer → 401 | pendiente subir |
-| `05-cliente-catalog-403.png` | Cliente + `GET /api/catalog/units` → 403 | pendiente subir |
-| `06-logout.png` | Sesión cerrada / vuelta a login | pendiente subir |
+| `01-login.png` | Pantalla login / redirect Microsoft | capturada — subir PNG |
+| `02-token-claims.png` | Access token o `/api/me` con `roles` | capturada — subir PNG |
+| `03-api-me-200.png` | `GET /api/me` → 200 (Admin u otro rol) | capturada — subir PNG |
+| `04-sin-token-401.png` | Sin Bearer → 401 | capturada — subir PNG |
+| `05-cliente-catalog-403.png` | Cliente + `GET /api/catalog/units` → 403 | capturada — subir PNG |
+| `06-logout.png` | Cierre de sesión Microsoft / post-logout | capturada — subir PNG |
 
 Mientras no estén las PNG, la evidencia de código/PR de la matriz sigue valiendo; las capturas cierran el criterio visual del issue #3.
 
