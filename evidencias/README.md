@@ -25,18 +25,32 @@ Mientras no estén las PNG, la evidencia de código/PR de la matriz sigue valien
 4. Login Cliente → intentar catálogo → BFF **403** (o mensaje en UI).
 5. Cerrar sesión → captura logout.
 
-## Checklist EP3 (Rabbit) — cuando existan PRs
+## Checklist EP3 (Rabbit) — capturas runtime (pendientes)
 
-| Archivo sugerido | Qué debe verse | Depende de |
+Código ya en `main` (matriz F25–F29). Falta solo PNG de demo:
+
+| Archivo sugerido | Qué debe verse | Evidencia de código |
 | --- | --- | --- |
-| `10-rabbit-queues.png` | UI Management con colas `q.cmd.*` y `*.dlq` | Rolando R1 |
-| `11-publish-consume.png` | Confirmar reserva → mensaje consumido / log notify | Rolando R2 |
-| `12-dlq.png` | Mensaje en DLQ tras NACK | Héctor H6 / notify |
-| `13-admin-create-queue.png` | `POST /api/queues` OK | Héctor H4 |
-| `14-admin-delete-queue.png` | `DELETE /api/queues/{name}` OK | Héctor H4 |
+| `10-rabbit-cluster.png` | `rabbitmqctl cluster_status` o UI Nodes: `rabbit@rabbitmq-1` + `rabbit@rabbitmq-2` | [infra#11](https://github.com/RolandoLillo/andesstay-infra/pull/11) |
+| `11-rabbit-queues.png` | UI Management con colas `q.cmd.*` y `*.dlq` | [notify#12](https://github.com/HeOlivares/andesstay-ms-notify/pull/12) |
+| `12-publish-consume.png` | Confirmar reserva → mensaje en colas / log notify | [reservations#13](https://github.com/RolandoLillo/andesstay-ms-reservations/pull/13) |
+| `13-dlq.png` | Mensaje en DLQ tras NACK / demo fail | [notify#15](https://github.com/HeOlivares/andesstay-ms-notify/pull/15) |
+| `14-admin-create-queue.png` | `POST /api/queues` → 201 | [rabbit-admin#7](https://github.com/HeOlivares/andesstay-ms-rabbit-admin/pull/7) |
+| `15-admin-validation-400.png` | `POST /api/queues` con `"name":""` → 400 `{"error":"..."}` | [rabbit-admin#7](https://github.com/HeOlivares/andesstay-ms-rabbit-admin/pull/7) |
+
+### Cómo sacarlas (EC2 o local)
+
+1. Infra: `cd apps && docker compose --env-file ../.env up -d --build --remove-orphans` (con `RABBITMQ_ERLANG_COOKIE` en `.env`).
+2. Cluster: `docker exec andesstay-rabbitmq-1 rabbitmqctl cluster_status` → captura `10`.
+3. UI `:15672` → Queues → captura `11`.
+4. Confirmar una reserva (`CONFIRMADA` + `guestEmail`) → captura colas/log notify (`12`).
+5. Demo DLQ notify si aplica → captura `13`.
+6. rabbit-admin: crear cola OK (`14`); POST name vacío → 400 (`15`).
 
 ## Evidencia ya referenciada sin captura
 
 - Issues frontend cerrados: #1–#7, #12–#20 (identidad, guards, dashboard, reservas, catálogo).
-- Notify: README + topología en [HeOlivares/andesstay-ms-notify](https://github.com/HeOlivares/andesstay-ms-notify).
-- Infra compose: PR [#9](https://github.com/RolandoLillo/andesstay-infra/pull/9).
+- Notify topología yml: [notify#12](https://github.com/HeOlivares/andesstay-ms-notify/pull/12); demo/DLQ: [notify#15](https://github.com/HeOlivares/andesstay-ms-notify/pull/15).
+- Publisher reservas → Rabbit: [reservations#13](https://github.com/RolandoLillo/andesstay-ms-reservations/pull/13).
+- Infra compose + clúster Rabbit: [infra#9](https://github.com/RolandoLillo/andesstay-infra/pull/9), [infra#11](https://github.com/RolandoLillo/andesstay-infra/pull/11).
+- rabbit-admin REST + validación: [rabbit-admin#7](https://github.com/HeOlivares/andesstay-ms-rabbit-admin/pull/7).

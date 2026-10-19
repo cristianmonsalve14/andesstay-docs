@@ -57,11 +57,11 @@ Estados: `implementada` | `parcial` | `no implementada`
 | F22 | Topología Rabbit: exchanges, colas, bindings | implementada | andesstay-ms-notify | [notify README](https://github.com/HeOlivares/andesstay-ms-notify) — `cmd.direct`, `q.cmd.email`, etc. |
 | F23 | Consumidores `@RabbitListener` por dominio + ACK/NACK | implementada | andesstay-ms-notify | Listeners email / housekeeping / voucher; ACK manual |
 | F24 | DLQ + log de mensajes no entregados | implementada | andesstay-ms-notify | Colas `*.dlq`; `GET /api/notify/metrics/dlq` |
-| F25 | Nombres de colas/exchanges centralizados en yml | parcial | andesstay-ms-notify | Hoy en `RabbitTopologyConfig` (constantes); falta yml (tarjeta Héctor H1) |
-| F26 | Productores desde dominio (p. ej. confirmar reserva → cola) | no implementada | ms-reservations | Tarjeta Rolando R2 |
-| F27 | RabbitMQ en docker-compose del equipo | no implementada | andesstay-infra | Tarjeta Rolando R1 |
-| F28 | MS administrador REST (crear/eliminar colas, exchanges, bindings) | no implementada | ms-rabbit-admin (nuevo) | Tarjetas Héctor H2–H5 |
-| F29 | `RabbitAdminService` + validación de entrada | no implementada | ms-rabbit-admin | Tarjetas Héctor H3–H5 |
+| F25 | Nombres de colas/exchanges centralizados en yml | implementada | andesstay-ms-notify | [notify#12](https://github.com/HeOlivares/andesstay-ms-notify/pull/12) — topología en `application.yml` |
+| F26 | Productores desde dominio (p. ej. confirmar reserva → cola) | implementada | ms-reservations | [reservations#13](https://github.com/RolandoLillo/andesstay-ms-reservations/pull/13) — `NotificationEnvelope` al confirmar (`CONFIRMADA`), best-effort |
+| F27 | RabbitMQ en docker-compose del equipo | implementada | andesstay-infra | [infra#11](https://github.com/RolandoLillo/andesstay-infra/pull/11) — clúster `rabbitmq-1` + `rabbitmq-2` |
+| F28 | MS administrador REST (crear/eliminar colas, exchanges, bindings) | implementada | ms-rabbit-admin | [rabbit-admin#7](https://github.com/HeOlivares/andesstay-ms-rabbit-admin/pull/7) — `/api/queues`, `/api/exchanges`, `/api/bindings` |
+| F29 | `RabbitAdminService` + validación de entrada | implementada | ms-rabbit-admin | [rabbit-admin#3](https://github.com/HeOlivares/andesstay-ms-rabbit-admin/pull/3) + [#7](https://github.com/HeOlivares/andesstay-ms-rabbit-admin/pull/7) — servicio + DTO `@Valid` → 400 |
 
 ## Reportes (fuera de EP3 inmediato)
 
@@ -75,12 +75,12 @@ Estados: `implementada` | `parcial` | `no implementada`
 
 | Estado | Cantidad | Notas |
 | --- | --- | --- |
-| implementada | 22 | F01–F19, F21–F24 (F20 parcial no cuenta) |
-| parcial | 2 | F20, F25 |
-| no implementada | 6 | F26–F30 + contar F20/F25 fuera del numerador |
+| implementada | 27 | F01–F19, F21–F29 (F20 parcial no cuenta) |
+| parcial | 1 | F20 |
+| no implementada | 1 | F30 (reportes; fuera de EP3 inmediato) |
 
 **Alcance considerado para EP3 (F01–F29):** 29 funcionalidades.  
-**Implementadas operativas hoy:** 22 → **~76%** del alcance listado.  
-**Para ≥90%:** cerrar F25–F29 (yml + compose Rabbit + publisher + admin REST/servicio/validación) y subir F20 si hay evidencia Gateway estable.
+**Implementadas operativas hoy:** 27 → **~93%** del alcance listado (≥90% rúbrica).  
+**Pendiente opcional:** F20 a `implementada` si hay evidencia Gateway estable en lab/EC2; capturas runtime EP3 en `evidencias/` (cluster, publish/consume, admin 400).
 
-Cuando Héctor/Rolando mergeen, actualizar esta tabla y las capturas en `evidencias/`.
+Código F25–F29 mergeado (2026-10-19). Capturas PNG de runtime se agregan cuando EC2/`compose` esté levantado.
