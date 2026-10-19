@@ -10,8 +10,8 @@ Documentación del proyecto semestral AndesStay.
 
 ## Descripción
 
-Repositorio de arquitectura, diagramas, capturas de evidencia (EP1/EP2) y guion de presentación.  
-Un solo GitHub Project (Kanban) cubre este repo y los demás componentes del sistema.
+Arquitectura, identidad Azure AD, matriz de funcionalidades, evidencias (EP1/EP2/EP3) y guion de presentación.  
+Un solo GitHub Project (Kanban) cubre este repo y el resto de componentes.
 
 ## Integrantes
 
@@ -23,13 +23,19 @@ Un solo GitHub Project (Kanban) cubre este repo y los demás componentes del sis
 
 ## Documentos
 
-- [Identidad Azure AD](IDENTIDAD.md) — tenant, App Registration, audience, scope, roles (sin secretos)
-- [Arquitectura v1](ARQUITECTURA.md) — diagrama JWT → Gateway → BFF → catálogo / reservas
+| Documento | Contenido |
+| --- | --- |
+| [IDENTIDAD.md](IDENTIDAD.md) | Tenant, App Registration, audience, scope, roles (sin secretos) |
+| [ARQUITECTURA.md](ARQUITECTURA.md) | Diagrama JWT → Gateway → BFF → dominio (+ Rabbit/notify) |
+| [MATRIZ-FUNCIONALIDADES.md](MATRIZ-FUNCIONALIDADES.md) | Alcance, estado, componente, evidencia (rúbrica sistematización) |
+| [evidencias/](evidencias/README.md) | Checklist de capturas 200/401/403 y EP3 Rabbit |
+
+Issue de cierre: [#3 Documentación y evidencia](https://github.com/cristianmonsalve14/andesstay-docs/issues/3).
 
 ## Tecnologías
 
 - Markdown
-- Diagramas de arquitectura (Mermaid)
+- Diagramas (Mermaid)
 - GitHub Projects (Kanban)
 
 ## Convención de ramas

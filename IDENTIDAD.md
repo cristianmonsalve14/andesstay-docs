@@ -29,15 +29,20 @@ Valores **públicos** que el frontend y el BFF necesitan para login y validació
 | Campo | Valor |
 | --- | --- |
 | Application ID URI | `api://4cd6df9a-e2f7-4024-aea6-dd67c49709bc` |
-| Audience del JWT | `api://4cd6df9a-e2f7-4024-aea6-dd67c49709bc` |
 | Scope | `access_as_user` |
 | Scope completo | `api://4cd6df9a-e2f7-4024-aea6-dd67c49709bc/access_as_user` |
 
-El frontend pide ese scope (MSAL + PKCE). El BFF debe validar **issuer**, **audience**, **firma**, **exp** y **roles**.
+El frontend pide ese scope (MSAL + PKCE).
+
+**Audience en la práctica**
+
+- El access token de MSAL suele traer `aud` = Client ID **sin** `api://` (`4cd6df9a-…`).
+- El **BFF** acepta la audiencia configurada en su Resource Server (GUID y/o `api://…` según `application.yml`).
+- El **API Gateway** JWT Authorizer es estricto: audience = Client ID **sin** `api://`, scope `access_as_user`. Si se configura `api://…` en el Gateway, el token válido de MSAL puede dar **401**.
 
 ## App roles
 
-Definidos en la App Registration (tipo **Users/Groups**, allowed member types).
+Definidos en la App Registration (tipo **Users/Groups**).
 
 | Valor (`value`) | Display name |
 | --- | --- |
@@ -55,16 +60,27 @@ Asignación 1:1 (Enterprise applications → AndesStay → Users and groups):
 | `andesstay.cliente@proyectomonsalve.onmicrosoft.com` | Cliente |
 | `andesstay.auditor@proyectomonsalve.onmicrosoft.com` | Auditor |
 
-Las contraseñas **no** van en este repo. Cada integrante las tiene por fuera.
+Las contraseñas **no** van en este repo.
 
 ## Qué valida cada capa
 
-1. **Angular + MSAL:** login/logout, PKCE, guarda tokens, interceptor adjunta Bearer a llamadas a `apiUrl`.
-2. **API Gateway:** CORS + JWT (issuer / audience). Sin token válido → 401.
-3. **BFF:** misma validación JWT + roles. Sin rol → 403. Endpoint de evidencia: `/api/me`.
-4. **Catálogo / reservas:** detrás del BFF; el navegador **no** los llama directo.
+1. **Angular + MSAL:** login/logout, PKCE, tokens, Bearer hacia `apiUrl`.
+2. **API Gateway:** CORS + JWT (issuer / audience / scope). Sin token → **401**.
+3. **BFF:** JWT + roles. Sin rol → **403**. Evidencia: `GET /api/me`.
+4. **Catálogo / reservas / audit / notify:** detrás del BFF (o solo broker para notify); el navegador **no** los llama directo.
+
+## Evidencia 200 / 401 / 403
+
+Ver checklist y capturas en [evidencias/README.md](evidencias/README.md).
+
+| Caso | Cómo | Código esperado |
+| --- | --- | --- |
+| Sin autenticación | Incógnito, `GET /api/me` sin Bearer | **401** |
+| Token válido | Login + Dashboard `GET /api/me` | **200** + `roles` |
+| Rol insuficiente | Cliente + `GET /api/catalog/units` | **403** |
+| Logout | Cerrar sesión MSAL | Vuelta a `/login` |
 
 ## Relación con issues
 
-- Frontend: tenant y usuarios (`andesstay-frontend#1`), App Registration (`#2`), roles (`#3`).
-- Docs: este archivo + diagrama en `ARQUITECTURA.md`.
+- Frontend: tenant (`#1`), App Registration (`#2`), roles (`#3`), MSAL (`#4` / `#12`), guards (`#5` / `#13`).
+- Docs: este archivo, [ARQUITECTURA.md](ARQUITECTURA.md), [MATRIZ-FUNCIONALIDADES.md](MATRIZ-FUNCIONALIDADES.md), issue [#3](https://github.com/cristianmonsalve14/andesstay-docs/issues/3).
