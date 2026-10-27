@@ -1,6 +1,6 @@
 # Arquitectura AndesStay (v2)
 
-Alcance operativo: login Azure AD, JWT (Gateway + BFF), microservicios de dominio detrás del BFF, panel de auditoría, y mensajería RabbitMQ (notify; admin/publisher EP3 en curso).
+Alcance operativo: login Azure AD, JWT (Gateway + BFF), microservicios de dominio detrás del BFF, panel de auditoría alimentado por eventos Kafka, y mensajería RabbitMQ (publicador en reservations, consumidores en notify y microservicio administrador).
 
 El navegador **solo** habla con Azure AD (login) y con el **API Gateway / BFF** (`/api`). Nunca llama directo a catálogo, reservas, audit ni notify.
 
@@ -14,8 +14,10 @@ flowchart LR
   CAT[Catálogo]
   RES[Reservas]
   AUD[Audit]
+  KFK[Kafka]
   RMQ[RabbitMQ]
   NTF[Notify]
+  ADM[Rabbit admin]
 
   U --> FE
   FE -->|login PKCE| AAD
@@ -25,8 +27,11 @@ flowchart LR
   BFF --> CAT
   BFF --> RES
   BFF --> AUD
-  RES -.->|publicar evento EP3| RMQ
+  RES -->|reservations.events| KFK
+  KFK -->|consumidor| AUD
+  RES -.->|cmd.direct / cmd.topic| RMQ
   RMQ --> NTF
+  ADM -.->|crea/elimina colas, exchanges, bindings| RMQ
 ```
 
 ## Flujo JWT (resumen)
@@ -44,10 +49,27 @@ flowchart LR
 
 1. Caso de uso asíncrono (ej. reserva confirmada) → productor publica a exchange `cmd.direct` / `cmd.topic`.
 2. Colas: `q.cmd.email`, `q.cmd.housekeeping`, `q.cmd.voucher` (+ `*.dlq`).
-3. `andesstay-ms-notify` consume con `@RabbitListener`, ACK manual; fallo → NACK sin requeue → DLQ.
-4. MS administrador (en construcción): API REST para crear/eliminar colas, exchanges y bindings.
+3. `andesstay-ms-notify` consume con `@RabbitListener` (un consumidor por dominio) y ACK manual.
+4. Decisión ante un fallo (`ReliableDelivery`):
 
-Detalle de nombres: [notify README](https://github.com/HeOlivares/andesstay-ms-notify).
+   | Resultado | Acción |
+   | --- | --- |
+   | Éxito | ACK |
+   | Mensaje duplicado (mismo `eventId`) | ACK sin ejecutar el trabajo |
+   | Error recuperable (`RecoverableDeliveryException`) | Reintenta hasta `andesstay.notify.retry.max-attempts` con `backoff-ms`, log `RETRY attempt=x/N`; si se agotan → NACK sin requeue → DLQ |
+   | Cualquier otro error | NACK sin requeue → DLQ en el primer fallo |
+
+   Cada NACK queda en el log (`reasonKind=exhausted` o `non-recoverable`) y en `GET /api/notify/metrics/dlq`.
+5. `andesstay-ms-rabbit-admin` (puerto `8085`): API REST para crear, actualizar y eliminar colas, exchanges y bindings (`/api/queues`, `/api/exchanges`, `/api/bindings`). Responde 201, 200, 204, 400 por validación y 404 al borrar un recurso inexistente. Toda la lógica vive en `RabbitAdminService`. **No tiene autenticación propia:** no debe exponerse por el Gateway, solo por la red interna. Hoy se ejecuta aparte; **todavía no figura en `compose.yml`** de infra.
+
+Detalle de nombres: [notify README](https://github.com/HeOlivares/andesstay-ms-notify) · [rabbit-admin README](https://github.com/HeOlivares/andesstay-ms-rabbit-admin).
+
+## Flujo de auditoría (Kafka)
+
+1. `andesstay-ms-reservations` publica cada evento de reserva (creada o cambio de estado) en el topic `reservations.events`.
+2. `andesstay-ms-audit` lo consume (`ReservationEventListener`) y guarda un registro de auditoría con acción, recurso, actor y detalle (`PENDING -> CONFIRMED`, unidad, huéspedes).
+3. El panel `/auditoria` lee `GET /api/audit/events` y `GET /api/audit/metrics` a través del BFF (solo roles Auditor y Admin).
+4. Las métricas se calculan sobre la tabla `reservations` de la base compartida: `ms-audit` necesita que `ms-reservations` ya haya creado el esquema.
 
 ## Repositorios
 
@@ -58,9 +80,9 @@ Detalle de nombres: [notify README](https://github.com/HeOlivares/andesstay-ms-n
 | BFF | [andesstay-ms-bff](https://github.com/HeOlivares/andesstay-ms-bff) | Héctor |
 | Catálogo | [andesstay-ms-catalog](https://github.com/HeOlivares/andesstay-ms-catalog) | Héctor |
 | Notify | [andesstay-ms-notify](https://github.com/HeOlivares/andesstay-ms-notify) | Héctor |
-| Rabbit admin | pendiente (EP3) | Héctor |
+| Rabbit admin | [andesstay-ms-rabbit-admin](https://github.com/HeOlivares/andesstay-ms-rabbit-admin) | Héctor |
 | Reservas | [andesstay-ms-reservations](https://github.com/RolandoLillo/andesstay-ms-reservations) | Rolando |
-| Audit | Rolando (`andesstay-ms-audit`) | Rolando |
+| Audit | [andesstay-ms-audit](https://github.com/RolandoLillo/andesstay-ms-audit) | Rolando |
 | Infra / Gateway | [andesstay-infra](https://github.com/RolandoLillo/andesstay-infra) | Rolando |
 
 Kanban: [AndesStay — Kanban](https://github.com/users/cristianmonsalve14/projects/3).
@@ -75,8 +97,9 @@ Kanban: [AndesStay — Kanban](https://github.com/users/cristianmonsalve14/proje
 | Catálogo | detrás del BFF (`/api/catalog/...`) |
 | Reservas | detrás del BFF (`/api/reservations/...`) |
 | Audit | detrás del BFF (`/api/audit/...`) |
-| Notify health | `GET /api/notify/health` (puerto según compose) |
-| RabbitMQ AMQP / UI | `5672` / `15672` (cuando Rolando lo agregue al compose) |
+| Notify health | `GET /api/notify/health` (puerto `8083` en compose; en el lab local puede chocar con el BFF si ambos usan `8083`) |
+| RabbitMQ AMQP / UI | `5672` / `15672` (clúster `rabbitmq-1` + `rabbitmq-2` en `compose.yml`) |
+| Rabbit admin | `http://localhost:8085/api/queues` (se ejecuta aparte; no está en `compose.yml`) |
 
 En EC2/compose del equipo el BFF suele publicarse en **8080**. No commitear URLs de lab personales en `main` del frontend.
 

@@ -26,9 +26,10 @@ Un solo GitHub Project (Kanban) cubre este repo y el resto de componentes.
 | Documento | Contenido |
 | --- | --- |
 | [IDENTIDAD.md](IDENTIDAD.md) | Tenant, App Registration, audience, scope, roles (sin secretos) |
-| [ARQUITECTURA.md](ARQUITECTURA.md) | Diagrama JWT → Gateway → BFF → dominio (+ Rabbit/notify) |
+| [ARQUITECTURA.md](ARQUITECTURA.md) | Diagrama JWT → Gateway → BFF → dominio, mensajería RabbitMQ y auditoría por Kafka |
 | [MATRIZ-FUNCIONALIDADES.md](MATRIZ-FUNCIONALIDADES.md) | Alcance, estado, componente, evidencia (rúbrica sistematización) |
-| [evidencias/](evidencias/README.md) | Checklist de capturas 200/401/403 y EP3 Rabbit |
+| [evidencias/](evidencias/README.md) | Checklist de capturas JWT/roles y EP3 (Rabbit, Kafka, Gateway) |
+| [GUION-PRESENTACION.md](GUION-PRESENTACION.md) | Guion de la presentación EP3: qué mostrar por indicador, demo en vivo y límites a declarar |
 
 Issue de cierre: [#3 Documentación y evidencia](https://github.com/cristianmonsalve14/andesstay-docs/issues/3).
 
